@@ -2,13 +2,15 @@
 
 Todas as mudancas relevantes seguem o formato do [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e o versionamento semantico.
 
-## [Nao lancado]
+## [1.0.1] - 2026-08-16
 
 ### Manutencao
 
 - atualizacoes automatizadas agrupadas por ecossistema;
+- atualizacoes principais reservadas para migracoes planejadas;
 - imagens de build e runtime mantidas deliberadamente no Java LTS 21.
 - GitHub Actions migradas para runtimes compativeis com Node.js 24.
+- Maven Wrapper marcado como executavel em ambientes Linux.
 
 ## [1.0.0] - 2026-08-16
 
