@@ -1,0 +1,7 @@
+{
+  "nome": "origem-pedidos",
+  "papel": "ORIGEM",
+  "urlJdbc": "jdbc:postgresql://banco-origem:5432/origem",
+  "usuario": "origem",
+  "referenciaSegredo": "env:DATARELAY_SENHA_ORIGEM"
+}

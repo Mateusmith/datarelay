@@ -1,0 +1,31 @@
+{
+  "nome": "replicacao-pedidos",
+  "conectorOrigemId": "00000000-0000-0000-0000-000000000001",
+  "idsConectoresDestino": [
+    "00000000-0000-0000-0000-000000000002",
+    "00000000-0000-0000-0000-000000000003"
+  ],
+  "modoPadrao": "INCREMENTAL",
+  "tamanhoLote": 500,
+  "expressaoCron": "0 */5 * * * *",
+  "mapeamentos": [
+    {
+      "esquemaOrigem": "public",
+      "tabelaOrigem": "clientes",
+      "esquemaDestino": "public",
+      "tabelaDestino": "clientes",
+      "colunaChave": "id",
+      "colunaIncremental": "atualizado_em",
+      "colunas": ["id", "nome", "email", "atualizado_em"]
+    },
+    {
+      "esquemaOrigem": "public",
+      "tabelaOrigem": "pedidos",
+      "esquemaDestino": "public",
+      "tabelaDestino": "pedidos",
+      "colunaChave": "id",
+      "colunaIncremental": "atualizado_em",
+      "colunas": ["id", "cliente_id", "total", "status", "atualizado_em"]
+    }
+  ]
+}

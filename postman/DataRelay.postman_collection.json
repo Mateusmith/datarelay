@@ -1,0 +1,500 @@
+{
+  "info": {
+    "_postman_id": "b88478b1-c858-43ca-8d5f-7b9bf4ec1d17",
+    "name": "DataRelay - Fluxo real local",
+    "description": "Fluxo ponta a ponta em portugues: autentica no Keycloak, cria conectores e plano, executa uma carga PostgreSQL real e comprova idempotencia.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "urlApi",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "urlKeycloak",
+      "value": "http://localhost:18081"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "sufixoExecucao",
+      "value": ""
+    },
+    {
+      "key": "conectorOrigemId",
+      "value": ""
+    },
+    {
+      "key": "conectorDestinoUmId",
+      "value": ""
+    },
+    {
+      "key": "conectorDestinoDoisId",
+      "value": ""
+    },
+    {
+      "key": "planoId",
+      "value": ""
+    },
+    {
+      "key": "execucaoId",
+      "value": ""
+    },
+    {
+      "key": "chaveIdempotencia",
+      "value": ""
+    },
+    {
+      "key": "tentativasConsulta",
+      "value": "0"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Autenticacao",
+      "item": [
+        {
+          "name": "Obter token da identidade de maquina",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const sufixo = Date.now().toString();",
+                  "pm.collectionVariables.set('sufixoExecucao', sufixo);",
+                  "pm.collectionVariables.set('chaveIdempotencia', `postman-carga-${sufixo}`);",
+                  "pm.collectionVariables.set('tentativasConsulta', '0');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token emitido com HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const resposta = pm.response.json();",
+                  "pm.test('Resposta contem um token Bearer', function () {",
+                  "    pm.expect(resposta.access_token).to.be.a('string').and.not.empty;",
+                  "    pm.expect(resposta.token_type.toLowerCase()).to.equal('bearer');",
+                  "});",
+                  "pm.collectionVariables.set('token', resposta.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "datarelay-cli",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "datarelay-cli-secret",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{urlKeycloak}}/realms/datarelay/protocol/openid-connect/token",
+            "description": "Solicita ao Keycloak um token OAuth2 da identidade de maquina e salva o JWT na variavel token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Conectores",
+      "item": [
+        {
+          "name": "Criar conector de origem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Conector de origem criado com HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const conector = pm.response.json();",
+                  "pm.test('Conector criado como ORIGEM', function () {",
+                  "    pm.expect(conector.papel).to.equal('ORIGEM');",
+                  "    pm.expect(conector.ativo).to.equal(true);",
+                  "});",
+                  "pm.collectionVariables.set('conectorOrigemId', conector.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"postman-origem-{{sufixoExecucao}}\",\n  \"papel\": \"ORIGEM\",\n  \"urlJdbc\": \"jdbc:postgresql://banco-origem:5432/origem\",\n  \"usuario\": \"origem\",\n  \"referenciaSegredo\": \"env:DATARELAY_SENHA_ORIGEM\"\n}"
+            },
+            "url": "{{urlApi}}/api/v1/conectores",
+            "description": "Cadastra o PostgreSQL que contem os clientes de origem. A API guarda apenas a referencia do segredo."
+          }
+        },
+        {
+          "name": "Testar conexao real com a origem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Teste de conexao respondeu HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const resultado = pm.response.json();",
+                  "pm.test('PostgreSQL de origem esta acessivel', function () {",
+                  "    pm.expect(resultado.acessivel).to.equal(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{urlApi}}/api/v1/conectores/{{conectorOrigemId}}/teste-conexao",
+            "description": "A aplicacao abre uma conexao JDBC de verdade usando a referencia de segredo cadastrada."
+          }
+        },
+        {
+          "name": "Criar primeiro conector de destino",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Primeiro destino criado com HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const conector = pm.response.json();",
+                  "pm.test('Conector criado como DESTINO', function () {",
+                  "    pm.expect(conector.papel).to.equal('DESTINO');",
+                  "});",
+                  "pm.collectionVariables.set('conectorDestinoUmId', conector.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"postman-destino-um-{{sufixoExecucao}}\",\n  \"papel\": \"DESTINO\",\n  \"urlJdbc\": \"jdbc:postgresql://banco-destino-um:5432/destino\",\n  \"usuario\": \"destino\",\n  \"referenciaSegredo\": \"env:DATARELAY_SENHA_DESTINO_UM\"\n}"
+            },
+            "url": "{{urlApi}}/api/v1/conectores"
+          }
+        },
+        {
+          "name": "Criar segundo conector de destino",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Segundo destino criado com HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const conector = pm.response.json();",
+                  "pm.test('Conector criado como DESTINO', function () {",
+                  "    pm.expect(conector.papel).to.equal('DESTINO');",
+                  "});",
+                  "pm.collectionVariables.set('conectorDestinoDoisId', conector.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"postman-destino-dois-{{sufixoExecucao}}\",\n  \"papel\": \"DESTINO\",\n  \"urlJdbc\": \"jdbc:postgresql://banco-destino-dois:5432/destino\",\n  \"usuario\": \"destino\",\n  \"referenciaSegredo\": \"env:DATARELAY_SENHA_DESTINO_DOIS\"\n}"
+            },
+            "url": "{{urlApi}}/api/v1/conectores"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Plano e carga",
+      "item": [
+        {
+          "name": "Criar plano de replicacao",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Plano criado com HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const plano = pm.response.json();",
+                  "pm.test('Plano possui dois destinos e dois mapeamentos ordenados', function () {",
+                  "    pm.expect(plano.idsConectoresDestino).to.have.length(2);",
+                  "    pm.expect(plano.mapeamentos).to.have.length(2);",
+                  "    pm.expect(plano.mapeamentos[0].tabelaOrigem).to.equal('clientes');",
+                  "    pm.expect(plano.mapeamentos[1].tabelaOrigem).to.equal('pedidos');",
+                  "});",
+                  "pm.collectionVariables.set('planoId', plano.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"postman-pedidos-{{sufixoExecucao}}\",\n  \"conectorOrigemId\": \"{{conectorOrigemId}}\",\n  \"idsConectoresDestino\": [\n    \"{{conectorDestinoUmId}}\",\n    \"{{conectorDestinoDoisId}}\"\n  ],\n  \"modoPadrao\": \"INCREMENTAL\",\n  \"tamanhoLote\": 2,\n  \"expressaoCron\": null,\n  \"mapeamentos\": [\n    {\n      \"esquemaOrigem\": \"public\",\n      \"tabelaOrigem\": \"clientes\",\n      \"esquemaDestino\": \"public\",\n      \"tabelaDestino\": \"clientes\",\n      \"colunaChave\": \"id\",\n      \"colunaIncremental\": \"atualizado_em\",\n      \"colunas\": [\"id\", \"nome\", \"email\", \"atualizado_em\"]\n    },\n    {\n      \"esquemaOrigem\": \"public\",\n      \"tabelaOrigem\": \"pedidos\",\n      \"esquemaDestino\": \"public\",\n      \"tabelaDestino\": \"pedidos\",\n      \"colunaChave\": \"id\",\n      \"colunaIncremental\": \"atualizado_em\",\n      \"colunas\": [\"id\", \"cliente_id\", \"total\", \"status\", \"atualizado_em\"]\n    }\n  ]\n}"
+            },
+            "url": "{{urlApi}}/api/v1/planos",
+            "description": "Define dois mapeamentos ordenados. Clientes sao gravados antes de pedidos para preservar a integridade referencial."
+          }
+        },
+        {
+          "name": "Validar esquema do plano",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validacao respondeu HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "const resultado = pm.response.json();",
+                  "pm.test('Tabelas, colunas, tipos e dependencias sao validos', function () {",
+                  "    pm.expect(resultado.valido).to.equal(true);",
+                  "    pm.expect(resultado.erros).to.be.an('array').that.is.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{urlApi}}/api/v1/planos/{{planoId}}/validacao-esquema",
+            "description": "Confere a estrutura real dos tres bancos antes da carga."
+          }
+        },
+        {
+          "name": "Iniciar carga completa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Carga aceita de forma assincrona com HTTP 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "const execucao = pm.response.json();",
+                  "pm.test('Execucao usa a chave idempotente enviada', function () {",
+                  "    pm.expect(execucao.chaveIdempotencia).to.equal(pm.collectionVariables.get('chaveIdempotencia'));",
+                  "});",
+                  "pm.collectionVariables.set('execucaoId', execucao.id);",
+                  "pm.collectionVariables.set('tentativasConsulta', '0');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chaveIdempotencia}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modo\": \"COMPLETA\"\n}"
+            },
+            "url": "{{urlApi}}/api/v1/planos/{{planoId}}/execucoes",
+            "description": "Enfileira uma carga completa. A mesma chave nao pode criar trabalho duplicado."
+          }
+        },
+        {
+          "name": "Acompanhar execucao ate finalizar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta respondeu HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const execucao = pm.response.json();",
+                  "const emAndamento = ['NA_FILA', 'EM_EXECUCAO'].includes(execucao.status);",
+                  "const tentativas = Number(pm.collectionVariables.get('tentativasConsulta') || 0) + 1;",
+                  "pm.collectionVariables.set('tentativasConsulta', String(tentativas));",
+                  "if (emAndamento && tentativas < 15) {",
+                  "    pm.execution.setNextRequest(pm.info.requestName);",
+                  "} else {",
+                  "    pm.test('Carga terminou com sucesso', function () {",
+                  "        pm.expect(execucao.status).to.equal('CONCLUIDA');",
+                  "        pm.expect(execucao.linhasLidas).to.be.above(0);",
+                  "        pm.expect(execucao.linhasEscritas).to.be.at.least(8);",
+                  "        pm.expect(execucao.destinos).to.have.length(2);",
+                  "        execucao.destinos.forEach(destino => pm.expect(destino.status).to.equal('CONCLUIDA'));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{urlApi}}/api/v1/execucoes/{{execucaoId}}",
+            "description": "No executor da colecao, repete a consulta enquanto a tarefa estiver na fila ou em execucao."
+          }
+        },
+        {
+          "name": "Repetir disparo e comprovar idempotencia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Repeticao continua respondendo HTTP 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "const execucao = pm.response.json();",
+                  "pm.test('A mesma chave devolve a mesma execucao', function () {",
+                  "    pm.expect(execucao.id).to.equal(pm.collectionVariables.get('execucaoId'));",
+                  "    pm.expect(execucao.status).to.equal('CONCLUIDA');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chaveIdempotencia}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modo\": \"COMPLETA\"\n}"
+            },
+            "url": "{{urlApi}}/api/v1/planos/{{planoId}}/execucoes"
+          }
+        },
+        {
+          "name": "Listar historico do plano",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Historico respondeu HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const historico = pm.response.json();",
+                  "pm.test('Historico contem apenas uma execucao para a chave repetida', function () {",
+                  "    const ocorrencias = historico.filter(item => item.chaveIdempotencia === pm.collectionVariables.get('chaveIdempotencia'));",
+                  "    pm.expect(ocorrencias).to.have.length(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{urlApi}}/api/v1/planos/{{planoId}}/execucoes?limite=20"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Execucoes por status",
+      "id": 1,
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "sum by (status) (datarelay_execucoes_total)", "legendFormat": "{{status}}", "refId": "A"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Linhas escritas por segundo",
+      "id": 2,
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "targets": [
+        {"expr": "rate(datarelay_linhas_escritas_total[5m])", "legendFormat": "linhas/s", "refId": "A"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Duracao p95 das execucoes",
+      "id": 3,
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(datarelay_execucao_duracao_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memoria JVM",
+      "id": 4,
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "targets": [
+        {"expr": "jvm_memory_used_bytes{area=\"heap\"}", "legendFormat": "usada", "refId": "A"},
+        {"expr": "jvm_memory_max_bytes{area=\"heap\"}", "legendFormat": "maxima", "refId": "B"}
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["datarelay", "spring-boot"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "DataRelay - Operacao",
+  "uid": "datarelay-operacao",
+  "version": 1
+}

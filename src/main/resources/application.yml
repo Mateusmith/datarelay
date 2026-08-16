@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: datarelay
+  datasource:
+    url: ${DATARELAY_CONTROLE_URL:jdbc:postgresql://localhost:5432/datarelay_controle}
+    username: ${DATARELAY_CONTROLE_USUARIO:datarelay}
+    password: ${DATARELAY_CONTROLE_SENHA:datarelay}
+    hikari:
+      maximum-pool-size: ${DATARELAY_CONTROLE_TAMANHO_POOL:10}
+      connection-timeout: 5000
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${DATARELAY_EMISSOR_JWT:http://localhost:18081/realms/datarelay}
+          jwk-set-uri: ${DATARELAY_URL_CHAVES_JWK:http://localhost:18081/realms/datarelay/protocol/openid-connect/certs}
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+datarelay:
+  conexao:
+    tempo-limite-segundos: ${DATARELAY_TEMPO_LIMITE_CONEXAO_SEGUNDOS:5}
+  execucao:
+    tamanho-nucleo-pool: ${DATARELAY_TAMANHO_NUCLEO_POOL:2}
+    tamanho-maximo-pool: ${DATARELAY_TAMANHO_MAXIMO_POOL:4}
+    capacidade-fila: ${DATARELAY_CAPACIDADE_FILA:50}
+  agendador:
+    ativo: ${DATARELAY_AGENDADOR_ATIVO:true}
+    intervalo-consulta: ${DATARELAY_INTERVALO_CONSULTA:30s}
+  recuperacao:
+    ativa: ${DATARELAY_RECUPERACAO_ATIVA:true}
+    intervalo: ${DATARELAY_INTERVALO_RECUPERACAO:10s}
+  replicacao:
+    sobreposicao: ${DATARELAY_SOBREPOSICAO_INCREMENTAL:1s}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        datarelay.execucao.duracao: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    oauth:
+      client-id: datarelay-swagger
+      use-pkce-with-authorization-code-grant: true
+
+logging:
+  pattern:
+    level: "%5p [idCorrelacao=%X{idCorrelacao:-}] [execucaoId=%X{execucaoId:-}]"

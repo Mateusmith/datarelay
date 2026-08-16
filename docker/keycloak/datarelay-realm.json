@@ -1,0 +1,78 @@
+{
+  "realm": "datarelay",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clientScopes": [
+    {
+      "name": "datarelay.leitura",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "datarelay.escrita",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "datarelay-cli",
+      "name": "DataRelay CLI",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "datarelay-cli-secret",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "datarelay.leitura",
+        "datarelay.escrita"
+      ]
+    },
+    {
+      "clientId": "datarelay-swagger",
+      "name": "DataRelay Swagger",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8080/swagger-ui/oauth2-redirect.html"
+      ],
+      "webOrigins": [
+        "http://localhost:8080"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "datarelay.leitura",
+        "datarelay.escrita"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "operador",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "DataRelay",
+      "lastName": "Operador",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "datarelay",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

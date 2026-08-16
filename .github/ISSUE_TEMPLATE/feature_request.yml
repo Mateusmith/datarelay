@@ -1,0 +1,32 @@
+name: Propor evolucao
+description: Sugira uma capacidade nova com problema e valor bem definidos.
+title: "feat: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema
+      description: Qual necessidade real ainda nao e atendida?
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: Descreva o comportamento desejado, sem impor uma implementacao quando nao for necessario.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+  - type: textarea
+    id: aceite
+    attributes:
+      label: Criterios de aceite
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true

@@ -1,0 +1,144 @@
+services:
+  banco-controle:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: datarelay_controle
+      POSTGRES_USER: datarelay
+      POSTGRES_PASSWORD: datarelay
+    ports:
+      - "54320:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datarelay -d datarelay_controle"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - dados-controle:/var/lib/postgresql/data
+
+  banco-origem:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: origem
+      POSTGRES_USER: origem
+      POSTGRES_PASSWORD: origem
+    ports:
+      - "54321:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U origem -d origem"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - ./docker/source/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - dados-origem:/var/lib/postgresql/data
+
+  banco-destino-um:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: destino
+      POSTGRES_USER: destino
+      POSTGRES_PASSWORD: destino
+    ports:
+      - "54322:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U destino -d destino"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - ./docker/target/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - dados-destino-um:/var/lib/postgresql/data
+
+  banco-destino-dois:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: destino
+      POSTGRES_USER: destino
+      POSTGRES_PASSWORD: destino
+    ports:
+      - "54323:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U destino -d destino"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - ./docker/target/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - dados-destino-dois:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.4
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "18081:8080"
+    volumes:
+      - ./docker/keycloak/datarelay-realm.json:/opt/keycloak/data/import/datarelay-realm.json:ro
+
+  aplicacao:
+    build: .
+    environment:
+      DATARELAY_CONTROLE_URL: jdbc:postgresql://banco-controle:5432/datarelay_controle
+      DATARELAY_CONTROLE_USUARIO: datarelay
+      DATARELAY_CONTROLE_SENHA: datarelay
+      DATARELAY_EMISSOR_JWT: http://localhost:18081/realms/datarelay
+      DATARELAY_URL_CHAVES_JWK: http://keycloak:8080/realms/datarelay/protocol/openid-connect/certs
+      DATARELAY_URL_AUTORIZACAO: http://localhost:18081/realms/datarelay/protocol/openid-connect/auth
+      DATARELAY_URL_TOKEN: http://localhost:18081/realms/datarelay/protocol/openid-connect/token
+      DATARELAY_SENHA_ORIGEM: origem
+      DATARELAY_SENHA_DESTINO_UM: destino
+      DATARELAY_SENHA_DESTINO_DOIS: destino
+    ports:
+      - "8080:8080"
+    depends_on:
+      banco-controle:
+        condition: service_healthy
+      banco-origem:
+        condition: service_healthy
+      banco-destino-um:
+        condition: service_healthy
+      banco-destino-dois:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: ["observability"]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "19090:9090"
+    volumes:
+      - ./docker/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - dados-prometheus:/prometheus
+    depends_on:
+      aplicacao:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: datarelay
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "13000:3000"
+    volumes:
+      - ./docker/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - dados-grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  dados-controle:
+  dados-origem:
+  dados-destino-um:
+  dados-destino-dois:
+  dados-prometheus:
+  dados-grafana:

@@ -1,0 +1,7 @@
+{
+  "nome": "destino-pedidos-um",
+  "papel": "DESTINO",
+  "urlJdbc": "jdbc:postgresql://banco-destino-um:5432/destino",
+  "usuario": "destino",
+  "referenciaSegredo": "env:DATARELAY_SENHA_DESTINO_UM"
+}

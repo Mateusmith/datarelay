@@ -1,0 +1,47 @@
+name: integracao-continua
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Validar Docker Compose
+        run: |
+          docker compose config --quiet
+          docker compose --profile observability config --quiet
+
+      - name: Compilar e testar
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Construir imagem da aplicacao
+        run: docker compose build aplicacao
+
+      - name: Publicar cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-jacoco
+          path: target/site/jacoco
+          if-no-files-found: warn

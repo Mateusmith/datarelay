@@ -1,0 +1,43 @@
+name: Relatar defeito
+description: Informe um comportamento reproduzivel que precisa de correcao.
+title: "bug: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Obrigado por ajudar a melhorar o DataRelay. Nao publique segredos ou dados pessoais.
+  - type: textarea
+    id: comportamento
+    attributes:
+      label: Comportamento observado
+      description: O que aconteceu e qual era o resultado esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Passos para reproduzir
+      placeholder: |
+        1. Inicie com...
+        2. Envie...
+        3. Observe...
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versao ou commit
+    validations:
+      required: true
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: Ambiente
+      description: Sistema operacional, Docker, Java e configuracoes relevantes.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs sanitizados
+      render: shell
