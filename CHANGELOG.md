@@ -2,6 +2,13 @@
 
 Todas as mudancas relevantes seguem o formato do [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e o versionamento semantico.
 
+## [Nao lancado]
+
+### Manutencao
+
+- atualizacoes automatizadas agrupadas por ecossistema;
+- imagens de build e runtime mantidas deliberadamente no Java LTS 21.
+
 ## [1.0.0] - 2026-08-16
 
 ### Adicionado
