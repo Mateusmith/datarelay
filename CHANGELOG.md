@@ -6,7 +6,7 @@ Todas as mudancas relevantes seguem o formato do [Keep a Changelog](https://keep
 
 ### Manutencao
 
-- atualizacoes automatizadas agrupadas por ecossistema;
+- dependencias compativeis atualizadas apos revisao e CI;
 - atualizacoes principais reservadas para migracoes planejadas;
 - imagens de build e runtime mantidas deliberadamente no Java LTS 21.
 - GitHub Actions migradas para runtimes compativeis com Node.js 24.
