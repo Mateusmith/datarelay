@@ -8,6 +8,7 @@ Todas as mudancas relevantes seguem o formato do [Keep a Changelog](https://keep
 
 - atualizacoes automatizadas agrupadas por ecossistema;
 - imagens de build e runtime mantidas deliberadamente no Java LTS 21.
+- GitHub Actions migradas para runtimes compativeis com Node.js 24.
 
 ## [1.0.0] - 2026-08-16
 
