@@ -5,7 +5,7 @@ RUN mvn -B -q dependency:go-offline
 COPY src src
 RUN mvn -B -q -DskipTests package
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S datarelay && adduser -S datarelay -G datarelay
 WORKDIR /app
 COPY --from=construcao /workspace/target/datarelay-*.jar app.jar
