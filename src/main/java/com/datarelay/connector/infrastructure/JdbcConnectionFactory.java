@@ -30,7 +30,7 @@ public class JdbcConnectionFactory {
         propriedades.setProperty("user", conector.usuario());
         propriedades.setProperty("password", provedorSegredos.resolver(conector.referenciaSegredo()));
         propriedades.setProperty("connectTimeout", Integer.toString(tempoLimiteConexaoSegundos));
-        propriedades.setProperty("ApplicationName", "DataRelay");
+        propriedades.setProperty("ApplicationName", "Replicador de Dados");
         return DriverManager.getConnection(conector.urlJdbc(), propriedades);
     }
 }

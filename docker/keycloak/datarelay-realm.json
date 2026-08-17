@@ -24,7 +24,7 @@
   "clients": [
     {
       "clientId": "datarelay-cli",
-      "name": "DataRelay CLI",
+      "name": "Replicador de Dados CLI",
       "enabled": true,
       "publicClient": false,
       "secret": "datarelay-cli-secret",
@@ -38,7 +38,7 @@
     },
     {
       "clientId": "datarelay-swagger",
-      "name": "DataRelay Swagger",
+      "name": "Replicador de Dados Swagger",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": false,
@@ -64,7 +64,7 @@
       "username": "operador",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "DataRelay",
+      "firstName": "Replicador de Dados",
       "lastName": "Operador",
       "credentials": [
         {

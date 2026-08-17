@@ -1,6 +1,6 @@
 # Testes locais no Postman
 
-A colecao `DataRelay.postman_collection.json` executa um fluxo real e completo sem depender de ambiente remoto do Postman.
+A colecao `ReplicadorDados.postman_collection.json` executa um fluxo real e completo sem depender de ambiente remoto do Postman.
 
 ## O que a colecao faz
 

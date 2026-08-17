@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.datarelay</groupId>
-    <artifactId>datarelay</artifactId>
+    <artifactId>replicador-dados</artifactId>
     <version>1.0.1</version>
-    <name>DataRelay</name>
+    <name>Replicador de Dados</name>
     <description>Servico de replicacao PostgreSQL retomavel com destinos isolados</description>
 
     <properties>

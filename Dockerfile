@@ -8,7 +8,7 @@ RUN mvn -B -q -DskipTests package
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S datarelay && adduser -S datarelay -G datarelay
 WORKDIR /app
-COPY --from=construcao /workspace/target/datarelay-*.jar app.jar
+COPY --from=construcao /workspace/target/replicador-dados-*.jar app.jar
 USER datarelay
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \

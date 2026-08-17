@@ -5,7 +5,7 @@ labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
-      value: Obrigado por ajudar a melhorar o DataRelay. Nao publique segredos ou dados pessoais.
+      value: Obrigado por ajudar a melhorar o Replicador de Dados. Nao publique segredos ou dados pessoais.
   - type: textarea
     id: comportamento
     attributes:

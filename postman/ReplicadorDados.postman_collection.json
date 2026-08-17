@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "b88478b1-c858-43ca-8d5f-7b9bf4ec1d17",
-    "name": "DataRelay - Fluxo real local",
+    "name": "Replicador de Dados - Fluxo real local",
     "description": "Fluxo ponta a ponta em portugues: autentica no Keycloak, cria conectores e plano, executa uma carga PostgreSQL real e comprova idempotencia.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

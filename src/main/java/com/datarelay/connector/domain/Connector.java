@@ -31,7 +31,7 @@ public record Connector(
         referenciaSegredo = exigirTexto(referenciaSegredo, "Referencia do segredo");
 
         if (!urlJdbc.startsWith("jdbc:postgresql://")) {
-            throw new DomainException("O DataRelay v1 aceita apenas URLs JDBC do PostgreSQL");
+            throw new DomainException("O Replicador de Dados v1 aceita apenas URLs JDBC do PostgreSQL");
         }
         if (!PADRAO_REFERENCIA_SEGREDO.matcher(referenciaSegredo).matches()) {
             throw new DomainException("A referencia do segredo deve usar o formato env:NOME_DA_VARIAVEL");

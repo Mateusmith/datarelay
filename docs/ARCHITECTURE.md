@@ -1,8 +1,8 @@
-# Arquitetura do DataRelay
+# Arquitetura do Replicador de Dados
 
 ## Contexto
 
-O DataRelay copia tabelas PostgreSQL selecionadas para destinos independentes. Ele atende integracoes em lote nas quais o time precisa controlar frequencia, volume, retomada, auditoria e falhas por destino. Nao pretende substituir replicacao fisica do PostgreSQL nem CDC por WAL.
+O Replicador de Dados copia tabelas PostgreSQL selecionadas para destinos independentes. Ele atende integracoes em lote nas quais o time precisa controlar frequencia, volume, retomada, auditoria e falhas por destino. Nao pretende substituir replicacao fisica do PostgreSQL nem CDC por WAL.
 
 ## Modulos
 

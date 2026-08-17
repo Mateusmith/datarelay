@@ -1,6 +1,6 @@
 spring:
   application:
-    name: datarelay
+    name: replicador-dados
   datasource:
     url: ${DATARELAY_CONTROLE_URL:jdbc:postgresql://localhost:5432/datarelay_controle}
     username: ${DATARELAY_CONTROLE_USUARIO:datarelay}

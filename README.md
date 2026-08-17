@@ -1,4 +1,4 @@
-# DataRelay
+# Replicador de Dados
 
 [![Java 21](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot 3.5](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -7,7 +7,9 @@
 
 Servico backend para replicacao controlada, incremental e retomavel de tabelas PostgreSQL para multiplos destinos.
 
-O DataRelay resolve um problema comum em integracoes empresariais: copiar dados operacionais para bancos independentes sem duplicar execucoes, perder o ponto de retomada ou interromper todos os destinos quando apenas um deles falha. A demonstracao replica `clientes` antes de `pedidos`, preservando a chave estrangeira entre as tabelas.
+O Replicador de Dados resolve um problema comum em integracoes empresariais: copiar dados operacionais para bancos independentes sem duplicar execucoes, perder o ponto de retomada ou interromper todos os destinos quando apenas um deles falha. A demonstracao replica `clientes` antes de `pedidos`, preservando a chave estrangeira entre as tabelas.
+
+O nome publico do produto e **Replicador de Dados**. Os prefixos tecnicos `DATARELAY_*`, o pacote `com.datarelay`, o realm `datarelay` e as metricas `datarelay_*` foram preservados para manter compatibilidade com ambientes existentes.
 
 ## Destaques tecnicos
 
@@ -30,7 +32,7 @@ O DataRelay resolve um problema comum em integracoes empresariais: copiar dados 
 
 ```mermaid
 flowchart LR
-    U["Operador ou sistema"] -->|"OAuth2 / JWT"| API["DataRelay API"]
+    U["Operador ou sistema"] -->|"OAuth2 / JWT"| API["Replicador de Dados API"]
     API --> C[("Banco de controle")]
     API -->|"cursor + lotes JDBC"| O[("PostgreSQL origem")]
     API -->|"UPSERT + checkpoint"| D1[("Destino 1")]
@@ -57,8 +59,8 @@ Nao e necessario instalar Java ou Maven para executar a demonstracao.
 ### 1. Iniciar
 
 ```powershell
-git clone https://github.com/Mateusmith/datarelay.git
-cd datarelay
+git clone https://github.com/Mateusmith/replicador-dados.git
+cd replicador-dados
 docker compose up --build --detach
 docker compose ps
 ```
@@ -103,7 +105,7 @@ docker compose --profile observability up --build --detach
 | Prometheus | http://localhost:19090 | sem autenticacao |
 | Grafana | http://localhost:13000 | `admin` / `datarelay` |
 
-O dashboard **DataRelay - Operacao** e provisionado automaticamente.
+O dashboard **Replicador de Dados - Operacao** e provisionado automaticamente.
 
 ## Autenticacao
 
@@ -304,7 +306,7 @@ Planos em execucao nao podem ser alterados. Conectores usados por um plano ativo
 
 ## Postman
 
-Importe [`postman/DataRelay.postman_collection.json`](postman/DataRelay.postman_collection.json) e execute **Run collection**. Nenhum environment externo e necessario.
+Importe [`postman/ReplicadorDados.postman_collection.json`](postman/ReplicadorDados.postman_collection.json) e execute **Run collection**. Nenhum environment externo e necessario.
 
 A colecao autentica, cria os conectores, testa JDBC, cria e valida o plano, executa a carga, aguarda o processamento, comprova idempotencia e consulta o historico.
 

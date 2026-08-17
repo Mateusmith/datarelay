@@ -47,11 +47,11 @@
   ],
   "refresh": "10s",
   "schemaVersion": 39,
-  "tags": ["datarelay", "spring-boot"],
+  "tags": ["replicador-dados", "spring-boot"],
   "templating": {"list": []},
   "time": {"from": "now-1h", "to": "now"},
   "timezone": "browser",
-  "title": "DataRelay - Operacao",
-  "uid": "datarelay-operacao",
+  "title": "Replicador de Dados - Operacao",
+  "uid": "replicador-dados-operacao",
   "version": 1
 }

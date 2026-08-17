@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfiguration {
 
     @Bean
-    OpenAPI documentacaoApiDataRelay(
+    OpenAPI documentacaoApiReplicadorDados(
         @Value("${DATARELAY_URL_AUTORIZACAO:http://localhost:18081/realms/datarelay/protocol/openid-connect/auth}")
         String urlAutorizacao,
         @Value("${DATARELAY_URL_TOKEN:http://localhost:18081/realms/datarelay/protocol/openid-connect/token}")
@@ -32,7 +32,7 @@ public class OpenApiConfiguration {
                     .addString("datarelay.escrita", "Criar configuracoes e iniciar execucoes"))));
         return new OpenAPI()
             .info(new Info()
-                .title("DataRelay API")
+                .title("Replicador de Dados API")
                 .version("v1")
                 .description("Replicacao PostgreSQL retomavel com destinos isolados"))
             .components(new Components().addSecuritySchemes(nomeEsquema, esquema))
